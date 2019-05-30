@@ -1,46 +1,48 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <unistd.h>
 
 typedef struct obiekt{
 	int x;
 	int y;
-	int zycia;
 	int sila;
-	int jedzenie;
 	struct obiekt *next;
 }lista;
 
 void losujObiekty();
 void wypisz();
 void ruch();
-void symulujDzien();
+void symuluj();
 void czyTaSamaPozycja();
 void usun();
 void dodajOb();
+void delay();
 
 int main(){
     srand(time(NULL));
-	int rozmiar,iloscOb;
+	int rozmiar,iloscOb,maxSila;
 	printf("Podaj rozmiar planszy:\n");
 	scanf("%d",&rozmiar);
 	char plansza[rozmiar][rozmiar];
+	printf("Podaj maksymalna losowana sile:\n");
+	scanf("%d",&maxSila);
 	do{
 		printf("Podaj poczatkowa iloscOb obiektow:\n");
 		scanf("%d",&iloscOb);
-		if(iloscOb>rozmiar*rozmiar) printf("ilosc obiektow/jedzenia nie moze przekraczac ilosci pol planszy!\n");
+		if(iloscOb>rozmiar*rozmiar) printf("ilosc obiektow nie moze przekraczac ilosci pol planszy!\n");
 	}while(iloscOb>rozmiar*rozmiar);
 
 	lista *obiekty=malloc(sizeof(lista));
-	losujObiekty(&obiekty,iloscOb,rozmiar,plansza);
+	losujObiekty(&obiekty,iloscOb,rozmiar,plansza, maxSila);
 	wypisz(rozmiar,plansza,obiekty); //plansza startowa
     puts("");
-	symulujDzien(&obiekty,rozmiar,plansza);
+	symuluj(&obiekty,rozmiar,plansza,maxSila);
 
 	return 0;
 }
 
-void losujObiekty(lista **head,int iloscOb, int rozmiar, char tab[][rozmiar]){
+void losujObiekty(lista **head,int iloscOb, int rozmiar, char tab[][rozmiar], int maxSila){
 	int i,j,x,y;
 	for(i=0;i<rozmiar;i++){
         for(j=0;j<rozmiar;j++){
@@ -48,9 +50,7 @@ void losujObiekty(lista **head,int iloscOb, int rozmiar, char tab[][rozmiar]){
         }
 	}
 	lista *current=*head;
-	current->sila=rand()%4;
-    current->zycia=rand()%3+1;
-    current->jedzenie=2;
+	current->sila=rand()%maxSila;
     x=rand()%rozmiar;
     y=rand()%rozmiar;
     while(tab[y][x]!='#'){
@@ -65,8 +65,6 @@ void losujObiekty(lista **head,int iloscOb, int rozmiar, char tab[][rozmiar]){
         current->next=malloc(sizeof(lista));
         current=current->next;
 		current->sila=rand()%4;
-		current->zycia=rand()%3+1;
-		current->jedzenie=2;
 		x=rand()%rozmiar;
 		y=rand()%rozmiar;
 		while(tab[y][x]!='#'){
@@ -82,6 +80,11 @@ void losujObiekty(lista **head,int iloscOb, int rozmiar, char tab[][rozmiar]){
 
 void wypisz(int rozmiar, char tab[][rozmiar], lista *head){
     int i,j;
+#ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+#endif
     lista *current=head;
     for(i=0;i<rozmiar;i++){
         for(j=0;j<rozmiar;j++){
@@ -133,23 +136,23 @@ void ruch(lista *current,int rozmiar){
     }
 }
 
-void symulujDzien(lista **head, int rozmiar, char tab[][rozmiar]){
+void symuluj(lista **head, int rozmiar, char tab[][rozmiar], int maxSila){
     int i;
     lista *current=*head;
-    for(i=0;i<4;i++){
+    for(i=0;i<16;i++){
         while(current->next!=NULL){
             ruch(current, rozmiar);
             current=current->next;
         }
-
+        delay(1);
         current=*head;
         wypisz(rozmiar,tab,*head);
-        czyTaSamaPozycja(head);
+        czyTaSamaPozycja(head, rozmiar, maxSila);
         puts("");
     }
 }
 
-void czyTaSamaPozycja(lista **head){
+void czyTaSamaPozycja(lista **head, int rozmiar, int maxSila){
     lista *obj1=*head, *obj2;
     while(obj1->next!=NULL){
             obj2=obj1->next;
@@ -162,7 +165,7 @@ void czyTaSamaPozycja(lista **head){
                         usun(head,obj1);
                     }
                     else{
-                        dodajOb(*head);
+                        dodajOb(*head, rozmiar, maxSila);
                     }
                 }
                 obj2=obj2->next;
@@ -187,17 +190,23 @@ void usun(lista **head, lista *doUsuniecia){
     }
 }
 
-void dodajOb(lista *head){
+void dodajOb(lista *head, int rozmiar, int maxSila){
     lista *current=head;
     while(current->next!=NULL){
         current=current->next;
     }
     current->next=malloc(sizeof(lista));
-    current->next->zycia=rand()%3+1;
-    current->next->x=0;
-    current->next->y=0;
-    current->next->sila=rand()%4;
+    current->next->x=rand()%rozmiar;
+    current->next->y=rand()%rozmiar;
+    current->next->sila=rand()%maxSila;
     current->next->next=NULL;
 }
 
-
+void delay(unsigned int sekundy){
+#ifdef _WIN32
+    clock_t start=clock();
+    while(clock() < start+sekundy*1000){;}
+#else
+    sleep(sekundy);
+#endif
+}
