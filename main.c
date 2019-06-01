@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
+#include "cfg.h"
 
 typedef struct obiekt{
 	int x;
@@ -20,29 +21,20 @@ void dodajOb();
 void delay();
 
 int main(){
+    makecfg();
+    readcfg();
     srand(time(NULL));
-	int rozmiar,iloscOb,maxSila;
-	printf("Podaj rozmiar planszy:\n");
-	scanf("%d",&rozmiar);
-	char plansza[rozmiar][rozmiar];
-	printf("Podaj maksymalna losowana sile:\n");
-	scanf("%d",&maxSila);
-	do{
-		printf("Podaj poczatkowa iloscOb obiektow:\n");
-		scanf("%d",&iloscOb);
-		if(iloscOb>rozmiar*rozmiar) printf("ilosc obiektow nie moze przekraczac ilosci pol planszy!\n");
-	}while(iloscOb>rozmiar*rozmiar);
-
+    char plansza[rozmiar][rozmiar];
 	lista *obiekty=malloc(sizeof(lista));
-	losujObiekty(&obiekty,iloscOb,rozmiar,plansza, maxSila);
-	wypisz(rozmiar,plansza,obiekty); //plansza startowa
+	losujObiekty(&obiekty,plansza);
+	wypisz(plansza,obiekty); //plansza startowa
     puts("");
-	symuluj(&obiekty,rozmiar,plansza,maxSila);
+	symuluj(&obiekty,plansza);
 
 	return 0;
 }
 
-void losujObiekty(lista **head,int iloscOb, int rozmiar, char tab[][rozmiar], int maxSila){
+void losujObiekty(lista **head,char tab[][rozmiar]){
 	int i,j,x,y;
 	for(i=0;i<rozmiar;i++){
         for(j=0;j<rozmiar;j++){
@@ -64,7 +56,7 @@ void losujObiekty(lista **head,int iloscOb, int rozmiar, char tab[][rozmiar], in
 	for(i=0;i<iloscOb;i++){
         current->next=malloc(sizeof(lista));
         current=current->next;
-		current->sila=rand()%4;
+		current->sila=rand()%maxSila;
 		x=rand()%rozmiar;
 		y=rand()%rozmiar;
 		while(tab[y][x]!='#'){
@@ -78,7 +70,7 @@ void losujObiekty(lista **head,int iloscOb, int rozmiar, char tab[][rozmiar], in
 	}
 }
 
-void wypisz(int rozmiar, char tab[][rozmiar], lista *head){
+void wypisz(char tab[][rozmiar], lista *head){
     int i,j;
 #ifdef _WIN32
     system("cls");
@@ -91,12 +83,12 @@ void wypisz(int rozmiar, char tab[][rozmiar], lista *head){
                 tab[i][j]='#';
         }
     }
+    iloscOb=0;
     while(current->next!=NULL){
-        printf("%d %d\n",current->x, current->y);
         tab[current->y][current->x]='O';
+        iloscOb++;
         current=current->next;
     }
-    puts("");
     for(i=0;i<rozmiar;i++){
         for(j=0;j<rozmiar;j++){
             printf("%c ",tab[i][j]);
@@ -105,7 +97,7 @@ void wypisz(int rozmiar, char tab[][rozmiar], lista *head){
     }
 }
 
-void ruch(lista *current,int rozmiar){
+void ruch(lista *current){
     int a;
     a=rand()%4+1;
     switch(a){
@@ -136,47 +128,50 @@ void ruch(lista *current,int rozmiar){
     }
 }
 
-void symuluj(lista **head, int rozmiar, char tab[][rozmiar], int maxSila){
+void symuluj(lista **head, char tab[][rozmiar]){
     int i;
     lista *current=*head;
-    for(i=0;i<16;i++){
+    for(i=0;i<czasSymulacji;i++){
+        current=*head;
         while(current->next!=NULL){
-            ruch(current, rozmiar);
+            ruch(current);
             current=current->next;
         }
-        delay(1);
-        current=*head;
-        wypisz(rozmiar,tab,*head);
-        czyTaSamaPozycja(head, rozmiar, maxSila);
+        wypisz(tab,*head);
+        czyTaSamaPozycja(head);
         puts("");
+        delay(1);
     }
 }
 
-void czyTaSamaPozycja(lista **head, int rozmiar, int maxSila){
+void czyTaSamaPozycja(lista **head){
     lista *obj1=*head, *obj2;
     while(obj1->next!=NULL){
             obj2=obj1->next;
-            while(obj2->next!=NULL){
+            while(obj2){
                 if(obj1->x == obj2->x && obj1->y == obj2->y){
-                    if(obj1->sila > obj2->sila){
+                    if(obj1->sila > obj2->sila && obj2->next!=NULL){
                         usun(head,obj2);
                     }
                     else if(obj1->sila < obj2->sila){
                         usun(head,obj1);
+                        break;
                     }
                     else{
-                        dodajOb(*head, rozmiar, maxSila);
+                        dodajOb(*head);
                     }
                 }
+
                 obj2=obj2->next;
             }
+
             obj1=obj1->next;
     }
 }
 
 void usun(lista **head, lista *doUsuniecia){
     lista *current=*head;
-    if(*head==doUsuniecia){
+    if(current==doUsuniecia){
         current=current->next;
         free(*head);
         *head=current;
@@ -190,16 +185,20 @@ void usun(lista **head, lista *doUsuniecia){
     }
 }
 
-void dodajOb(lista *head, int rozmiar, int maxSila){
+void dodajOb(lista *head){
+    iloscOb=0;
     lista *current=head;
     while(current->next!=NULL){
         current=current->next;
+        iloscOb++;
     }
-    current->next=malloc(sizeof(lista));
-    current->next->x=rand()%rozmiar;
-    current->next->y=rand()%rozmiar;
-    current->next->sila=rand()%maxSila;
-    current->next->next=NULL;
+    if(iloscOb<rozmiar*rozmiar-2){
+        current->next=malloc(sizeof(lista));
+        current->next->x=rand()%rozmiar;
+        current->next->y=rand()%rozmiar;
+        current->next->sila=rand()%maxSila+1;
+        current->next->next=NULL;
+    }
 }
 
 void delay(unsigned int sekundy){
