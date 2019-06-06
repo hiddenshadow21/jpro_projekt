@@ -79,12 +79,17 @@ void wypisz(char tab[][rozmiar], lista *head){
     iloscOb=0;
     while(current->next!=NULL){
         tab[current->y][current->x]='O';
+		if(typPlanszy == 2){
+			tab[current->y][current->x]=current->sila;
+		}
         iloscOb++;
         current=current->next;
     }
     for(i=0;i<rozmiar;i++){
         for(j=0;j<rozmiar;j++){
-            printf("%c ",tab[i][j]);
+			if(typPlanszy == 2 && tab[i][j]!='#') printf("%2d ",tab[i][j]);
+			else printf("%2c ",tab[i][j]);
+			
         }
         puts("");
     }
@@ -123,6 +128,7 @@ void ruch(lista *current){
 
 void symuluj(lista **head, char tab[][rozmiar]){
     int i;
+	
     lista *current=*head;
     for(i=0;i<czasSymulacji;i++){
         current=*head;

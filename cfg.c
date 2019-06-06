@@ -5,7 +5,7 @@ typedef struct obiekt{
 	struct obiekt *next;
 }lista;
 
-unsigned int rozmiar,maxSila,iloscOb,czasSymulacji;
+unsigned int rozmiar,maxSila,iloscOb,czasSymulacji,typPlanszy;
 
 void readcfg(){
     FILE *plik;
@@ -24,6 +24,9 @@ void readcfg(){
     fgets(linia,30,plik);
     sscanf(linia,"%s %d",name,&czasSymulacji);
     printf("%s %d\n",name,czasSymulacji);
+	fgets(linia,30,plik);
+	sscanf(linia,"%s %d",name,&typPlanszy);
+    printf("%s %d\n",name,typPlanszy);
     fclose(plik);
 }
 
@@ -43,18 +46,22 @@ void makecfg(){
     }
     printf("Podaj ilosc krokow symulacji:\n");
     scanf("%d",&czasSymulacji);
+	printf("Podaj tryb wyswietlania (1 lub 2):\n");
+	printf("  ###\t  ###\n1)O#O\t2)3#6\n  O##\t  9##\n");
+    scanf("%d",&typPlanszy);
     fprintf(plik,"rozmiar: %d\n",rozmiar);
     fprintf(plik,"MaksymalnaSila: %d\n",maxSila);
     fprintf(plik,"IloscObiektow: %d\n",iloscOb);
     fprintf(plik,"czasSymulacji: %d\n",czasSymulacji);
+	fprintf(plik,"typPlanszy: %d\n",typPlanszy);
     fclose(plik);
 }
 
 void summary(lista *head){
     FILE *plik=fopen("wynik.txt","w");
     fprintf(plik,"Wynik po %d krokach:\n",czasSymulacji);
-    fprintf(plik,"Ilosc ¿ywych obiektow: %d\n",iloscOb);
-    fprintf(plik,"Rozklad si³:\n");
+    fprintf(plik,"Ilosc zywych obiektow: %d\n",iloscOb);
+    fprintf(plik,"Rozklad sil:\n");
     int delta = 2;
     int ilosc_przedzialow = maxSila/delta+1;
     int *ilosc_liczb= calloc(ilosc_przedzialow,sizeof(int));
