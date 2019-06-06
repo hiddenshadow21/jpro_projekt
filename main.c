@@ -4,13 +4,6 @@
 #include <unistd.h>
 #include "cfg.h"
 
-typedef struct obiekt{
-	int x;
-	int y;
-	int sila;
-	struct obiekt *next;
-}lista;
-
 void losujObiekty();
 void wypisz();
 void ruch();
@@ -30,7 +23,7 @@ int main(){
 	wypisz(plansza,obiekty); //plansza startowa
     puts("");
 	symuluj(&obiekty,plansza);
-
+	summary(obiekty);
 	return 0;
 }
 

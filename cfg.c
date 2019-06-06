@@ -1,3 +1,9 @@
+typedef struct obiekt{
+	int x;
+	int y;
+	int sila;
+	struct obiekt *next;
+}lista;
 
 unsigned int rozmiar,maxSila,iloscOb,czasSymulacji;
 
@@ -25,7 +31,7 @@ void readcfg(){
 void makecfg(){
     FILE *plik;
     plik=fopen("cfg.txt","w");
-    printf("Podaj rozmiar planszy:\n");
+    printf("Podaj rozmiar planszy kwadratowej:\n");
     scanf("%d",&rozmiar);
     printf("Podaj maksymalna sile:\n");
     scanf("%d",&maxSila);
@@ -35,11 +41,18 @@ void makecfg(){
         printf("Ilosc obiektow nie moze przekraczac pol planszy!\nPodaj ponownie ilosc obiektow:\n");
         scanf("%d",&iloscOb);
     }
-    printf("Podaj czas trwania symulacji:\n");
+    printf("Podaj ilosc krokow symulacji:\n");
     scanf("%d",&czasSymulacji);
     fprintf(plik,"rozmiar: %d\n",rozmiar);
     fprintf(plik,"MaksymalnaSila: %d\n",maxSila);
     fprintf(plik,"IloscObiektow: %d\n",iloscOb);
-    fprintf(plik,"czasSymulacji: %d\n",iloscOb);
+    fprintf(plik,"czasSymulacji: %d\n",czasSymulacji);
     fclose(plik);
+}
+
+void summary(lista *head){
+    FILE *plik=fopen("wynik.txt","w");
+    fprintf(plik,"Wynik po %d krokach:\n",czasSymulacji);
+    fprintf(plik,"Ilosc ¿ywych obiektow: %d\n",iloscOb);
+    fprintf(plik,"Rozklad si³:\n");
 }
