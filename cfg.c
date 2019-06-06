@@ -55,4 +55,38 @@ void summary(lista *head){
     fprintf(plik,"Wynik po %d krokach:\n",czasSymulacji);
     fprintf(plik,"Ilosc ¿ywych obiektow: %d\n",iloscOb);
     fprintf(plik,"Rozklad si³:\n");
+    int delta = 2;
+    int ilosc_przedzialow = maxSila/delta+1;
+    int *ilosc_liczb= calloc(ilosc_przedzialow,sizeof(int));
+    int i,j;
+    lista *current;
+    for(i=0;i<ilosc_przedzialow;i++){
+        current=head;
+        for(j=0;j<iloscOb;j++){
+
+            if(current->sila >= (i*delta) && current->sila < ((i+1)*delta))
+                ilosc_liczb[i]++;
+                if(current->next != NULL) current=current->next;
+        }
+    }
+    int szerokosc=60;
+    double max=ilosc_liczb[0];
+    for(i=0;i<ilosc_przedzialow;i++){
+        if(max<ilosc_liczb[i])
+            max=ilosc_liczb[i];
+    }
+
+
+    for(i=0;i<ilosc_przedzialow;i++){
+        fprintf(plik,"(%3d, %3d)|",i*delta,(i+1)*delta);
+        j=(int)(szerokosc*ilosc_liczb[i]/max);
+        while(j>0){
+            fprintf(plik,"*");
+            j--;
+        }
+        fprintf(plik,"%d\n",ilosc_liczb[i]);
+    }
+    free(ilosc_liczb);
+    fclose(plik);
+    printf("Zapisano wynik do pliku.\n");
 }
