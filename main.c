@@ -128,7 +128,6 @@ void ruch(lista *current){
 
 void symuluj(lista **head, char tab[][rozmiar]){
     int i;
-	
     lista *current=*head;
     for(i=0;i<czasSymulacji;i++){
         current=*head;
@@ -136,8 +135,8 @@ void symuluj(lista **head, char tab[][rozmiar]){
             ruch(current);
             current=current->next;
         }
-        wypisz(tab,*head);
         czyTaSamaPozycja(head);
+		wypisz(tab,*head);
         puts("");
         delay(1);
     }

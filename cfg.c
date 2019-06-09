@@ -71,7 +71,7 @@ void summary(lista *head){
         current=head;
         for(j=0;j<iloscOb;j++){
 
-            if(current->sila >= (i*delta) && current->sila < ((i+1)*delta))
+            if(current->sila > (i*delta) && current->sila <= ((i+1)*delta))
                 ilosc_liczb[i]++;
                 if(current->next != NULL) current=current->next;
         }
@@ -85,7 +85,7 @@ void summary(lista *head){
 
 
     for(i=0;i<ilosc_przedzialow;i++){
-        fprintf(plik,"(%3d, %3d)|",i*delta,(i+1)*delta);
+        fprintf(plik,"(%3d, %3d]|",i*delta,(i+1)*delta);
         j=(int)(szerokosc*ilosc_liczb[i]/max);
         while(j>0){
             fprintf(plik,"*");
